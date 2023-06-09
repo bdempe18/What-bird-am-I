@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>What Bird Am I?</title>
+  <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="https://pyscript.net/latest/pyscript.js"></script>
+  </py-script>
+</head>
+<body>
+  <py-config>
+    packages = ['pandas']
+  </py-config>
+  <script>
+    var appendTens;
+    var appendSeconds;
+    var buttonStart;
+    var Interval;
+    var seconds = 00; 
+    var tens = 00; 
+    function startTimer () {
+      tens++; 
+      
+      if(tens <= 9){
+        appendTens.innerHTML = "0" + tens;
+      }
+      
+      if (tens > 9){
+        appendTens.innerHTML = tens;
+        
+      } 
+      
+      if (tens > 99) {
+        seconds++;
+        appendSeconds.innerHTML = "0" + seconds;
+        tens = 0;
+        appendTens.innerHTML = "0" + 0;
+      }
+      
+      if (seconds > 9){
+        appendSeconds.innerHTML = seconds;
+      }
+    }
+
+    function stopTimer() {
+      clearInterval(Interval);
+    }
+
+    function resetTimer() {
+      clearInterval(Interval);
+      tens = "00";
+      seconds = "00";
+      appendTens.innerHTML = tens;
+      appendSeconds.innerHTML = seconds;
+
+    }
+
+
+    window.onload = function() {
+      appendTens = document.getElementById("tens")
+      appendSeconds = document.getElementById("seconds")
+      buttonStart = document.getElementById('button-start');
+      buttonGuess = document.getElementById('button-guess');
+      inputGuess = document.getElementById('input-guess');
+      const birdImage = document.getElementById('random-bird-image');
+      const correctAnswer = document.getElementById('species');
+
+      buttonStart.onclick = function() {
+        birdImage.removeAttribute("hidden") 
+        clearInterval(Interval);
+         Interval = setInterval(startTimer, 10);
+      }
+      
+      buttonGuess.onclick = function() {
+        stopTimer();
+        document.getElementById('answer-text').removeAttribute('hidden')
+      }
+      
+      clearInterval(Interval);
+    }
+  </script>
+  <py-script>
+    import js
+    from js import Interval, setInterval, startTimer
+    import pandas as pd
+    from pyodide.http import open_url
+    url = (
+        'https://raw.githubusercontent.com/bdempe18/What-bird-am-I/main/bird_details.csv'
+    )
+    df = pd.read_csv(open_url(url))
+
+    random_bird = df.sample(n=1)
+    bird_image = random_bird.image.values[0]
+    species = random_bird.species.values[0]
+
+    js.document.getElementById("species").value = species
+    js.document.getElementById("random-bird-image").src = bird_image
+    js.document.getElementById("lookup").href = f"https://ebird.org/species/{species}" 
+
+  </py-script>
+  <div class="container">
+    <input type="hidden" id="species"></input>
+
+    <h1>What Bird Am I?</h1>
+    <button id="button-start">Go</button>
+
+    <p><span id="seconds">00</span>:<span id="tens">00</span></p>
+
+    <img id="random-bird-image" src="" width="500" height="500" hidden>
+
+    <div id="answer-text" hidden>
+      <p>Maybe! I went through all this effort before realizing that my dataset had incorrect bird names.</p>
+      <a id="lookup" target="_blank">Look it up yourself, nerd</a>
+    </div>
+
+    <div class="guess-row">
+      <input type="text" placeholder="Species" id="input-guess">
+      <button type="button" id="button-guess">Guess</button>
+    </div>
+  </div>
+
+
+</body>
+</html>
